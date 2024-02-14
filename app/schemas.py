@@ -1,9 +1,10 @@
-from pydantic import BaseModel
+from datetime import datetime
+from pydantic import BaseModel, EmailStr
 
 
 # use a class to define a post should look like
 class PostBase(BaseModel):
-    title:str
+    title: str
     content: str
     published: bool = True
 
@@ -20,6 +21,22 @@ class PostUpdate(PostBase):
 
 # define a class for post when it's being requested
 class PostReponse(PostBase):
+
+    class Config:
+        orm_mode = True
+
+
+# use a class to define a user should look like when it's being created
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+
+# filter the sent back info after the user is created
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
 
     class Config:
         orm_mode = True
