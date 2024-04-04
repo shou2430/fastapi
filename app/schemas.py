@@ -40,3 +40,9 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# use a class to define a user should look like when it's being logged in
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
