@@ -1,3 +1,4 @@
+from typing import Optional
 from ..schemas import PostCreate, PostUpdate, PostReponse
 from ..database import get_db
 from sqlalchemy.orm import Session
@@ -11,8 +12,9 @@ router = APIRouter(
 
 
 @router.get("/", response_model=list[PostReponse])
-def get_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
+def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+    print(limit, search)
+    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     return posts
 
 
