@@ -35,10 +35,11 @@ class TokenData(BaseModel):
 
 # use a class to define a post should look like
 class PostBase(BaseModel):
-    # id: int
+    id: int
     title: str
     content: str
     published: bool = True
+    owner_id: int
 
 
 # use a class to define a post should look like when it's being created
@@ -53,9 +54,21 @@ class PostUpdate(PostBase):
 
 # define a class for post when it's being requested
 class PostReponse(PostBase):
-    id: int
-    owner_id: int
     owner: UserOut
+    
+    class Config:
+        orm_mode = True
+
+
+# define a class for post when it's being requested
+class PostOut(BaseModel):
+    Post: PostReponse
+    votes: int
 
     class Config:
         orm_mode = True
+
+# define a class for vote when it's being created
+class VoteInfo(BaseModel):
+    post_id: int
+    switch: int

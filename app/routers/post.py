@@ -1,7 +1,8 @@
 from typing import Optional
-from ..schemas import PostCreate, PostUpdate, PostReponse
+from ..schemas import PostCreate, PostUpdate, PostReponse, PostOut
 from ..database import get_db
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from .. import models, oauth2
 
@@ -10,18 +11,24 @@ router = APIRouter(
     prefix="/posts"
 )
 
-
-@router.get("/", response_model=list[PostReponse])
+@router.get("/", response_model=list[PostOut])
 def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
     print(limit, search)
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
-    return posts
+    # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    result = db.query(models.Post, func.count(models.Votes.post_id).label("votes")).outerjoin(
+        models.Votes, models.Post.id == models.Votes.post_id).group_by(models.Post.id)
+    print(result)
+    result.all()
+    return result
 
 
-@router.get("/{id}", response_model=PostReponse)
+@router.get("/{id}", response_model=PostOut)
 def get_post(id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    print(type(post))
+    post = db.query(models.Post, func.count(models.Votes.post_id).label("votes")).\
+        outerjoin(models.Votes, models.Post.id == models.Votes.post_id).\
+        filter(models.Post.id == id).\
+        group_by(models.Post.id).first()
+    
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"post with id: {id} was not found")
