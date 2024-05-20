@@ -36,5 +36,5 @@ def create_vote(vote: VoteInfo, db:Session = Depends(get_db), current_user: mode
     # if the vote doesn't exist and the user want to vote, create the vote
     new_vote = models.Votes(user_id=current_user.id, post_id=vote.post_id)
     db.add(new_vote)
-    db.commit()    
+    db.commit() 
     return {"message": "vote created successfully"}
